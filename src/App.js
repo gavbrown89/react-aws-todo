@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import {
+  Card,
+  Form,
+  Button
+} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Amplify, {API,graphqlOperation} from 'aws-amplify';
-import { withAuthenticator } from 'aws-amplify-react';
-import { AmplifyAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
-import { AuthState, onAuthUIStateChange } from '@aws-amplify/ui-components';
+import { 
+  AmplifyAuthenticator, 
+  AmplifySignUp,
+  AmplifySignOut 
+} from '@aws-amplify/ui-react';
+import { 
+  AuthState, 
+  onAuthUIStateChange 
+} from '@aws-amplify/ui-components';
 
 import aws_exports from './aws-exports';
 Amplify.configure(aws_exports);
 
-const createTodo = `mutation createTodo($note: String!) {
+const createTodo = `mutation createTodo($todo: String!) {
   createTodo(input: {
     todo: $todo
   }) {
@@ -20,8 +31,8 @@ const createTodo = `mutation createTodo($note: String!) {
   }
 }`;
 
-const readTodo = `query listTodo {
-  listTodo {
+const readTodo = `query listTodos {
+  listTodos {
     items {
       __typename
       id
@@ -67,11 +78,16 @@ export const App = () => {
     });
   };
 
-  useEffect(async () => {
+  const initializeTodo = async () => { 
+    const getTodo = await API.graphql(graphqlOperation(readTodo));
+    setTodo(getTodo.data.listTodos.items);
+  };
+
+  useEffect(() => {
     authStateChange();
-    const todo = await API.graphql(graphqlOperation(readTodo));
-    setTodo(todo.data.listTodo.items);
-  });
+    initializeTodo();
+    console.log(todo);
+  }, []);
 
   const handleChange = (e) => {
     setValue(e.target.value);
@@ -80,16 +96,16 @@ export const App = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const todo = {"todo": todo};
+    const todo = {"todo": value};
     await API.graphql(graphqlOperation(createTodo, todo));
-    listTodo();
+    listTodos();
     setValue('');
   };
 
   const handleDelete = async (id) => {
     const todoId = {"id": id};
     await API.graphqlOperation(deleteTodo, todoId);
-    listTodo();
+    listTodos();
   };
 
   const handleUpdate = async (e) => {
@@ -100,28 +116,28 @@ export const App = () => {
       "todo": value
     };
     await API.graphql(graphqlOperation(updateTodo, todo));
-    listTodo();
+    listTodos();
     setAddBtn(true);
     setUpdateBtn(false);
     setValue('');
   };
 
-  const selectTodo = (todo) => {
+  const selectTodo = (todo) => {  
     setId(todo.id);
-    setValue(todo.todo);
+    setValue(todo.todo);    
     setAddBtn(false);
     setUpdateBtn(true);
   };
 
-  const listTodo = async () => {
+  const listTodos = async () => {
     const todo = await API.graphql(graphqlOperation(readTodo));
-    setTodo(todo.data.listTodo.items);
+    setTodo(todo.data.listTodos.items);
   };
 
   const data = [].concat(todo).map((item, i) =>
     <div className="alert alert-primary alert-dismissible show" role="alert">
-      <span key={item.i} onClick={selectTodo(this, item)}>{item.note}</span>
-      <button key={item.i} type="button" className="close" data-dismiss="alert" aria-label="Close">
+      <span key={item} onClick={() => {selectTodo(item)}}>{item.todo}</span>
+      <button key={i + 1} type="button" onClick={() => {handleDelete(item.id)}} className="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
@@ -130,41 +146,58 @@ export const App = () => {
   return (
     authState === AuthState.SignedIn && user ? (
       <div className="App">
-        <header className="App-header" alt="logo">
+        <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Todo App</h1>
+          <h2 className="App-title">Todo App</h2>
           <AmplifySignOut />
         </header>
         <div className="container">
-          {addBtn ?
-            <form onSubmit={handleSubmit}>
-              <div className="input-group mb-3">
-                <input type="text" className="form-control form-control-lg" placeholder="new todo" />
-                <div className="input-group-append">
-                  <button className="btn btn-primary" type="submit">
-                    Add todo
-                  </button>
+          <Card>
+            <Card.Header>Create a new todo</Card.Header>
+            {addBtn ?
+            <Card.Body>
+              <form onSubmit={handleSubmit}>
+                <div className="input-group mb-3">
+                  <input type="text" className="form-control form-control-lg" placeholder="new todo" value={value} onChange={handleChange} />
+                  <div className="input-group-append">
+                    <button className="btn btn-primary" type="submit">
+                      Add todo
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </form>
-          : null}
-          {updateBtn ?
-            <form onSubmit={handleUpdate}>
-              <div className="input-group mb-3">
-                <input type="text" className="form-control form-control-lg" placeholder="Update todo" />
-                <div className="input-group-append">
-                  <button className="btn btn-primary" type="submit" >Update todo</button>
+              </form>
+            </Card.Body>
+            : null}
+            {updateBtn ?
+            <Card.Body>
+              <form onSubmit={handleUpdate}>
+                <div className="input-group mb-3">
+                  <input type="text" className="form-control form-control-lg" placeholder="Update todo" value={value} onChange={handleChange} />
+                  <div className="input-group-append">
+                    <button className="btn btn-primary" type="submit" >Update todo</button>
+                  </div>
                 </div>
-              </div>
-            </form>
-          : null}
-        </div>
-        <div className="container">
-          {data}
+              </form>
+            </Card.Body>
+            : null}
+            <Card.Body>
+              {data}
+            </Card.Body>
+          </Card>
         </div>
       </div>
     ) : (
-      <AmplifyAuthenticator />
+      <AmplifyAuthenticator>
+        <AmplifySignUp 
+          slot="sign-up"
+          formFields={[
+            { type: "username" },
+            { type: "email" },
+            { type: "password" },
+            { type: "phone_number" }
+          ]}
+        />
+      </AmplifyAuthenticator>
     )
   );
 }
