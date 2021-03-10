@@ -133,6 +133,16 @@ export const App = () => {
             </div>
           </form>
         : null}
+        {updateBtn ?
+          <form onSubmit={handleUpdate}>
+            <div className="input-group mb-3">
+              <input type="text" className="form-control form-control-lg" placeholder="Update todo" />
+              <div className="input-group-append">
+                <button className="btn btn-primary" type="submit" >Update todo</button>
+              </div>
+            </div>
+          </form>
+        : null}
       </div>
       <div className="container">
         {data}
