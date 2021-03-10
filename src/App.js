@@ -104,7 +104,7 @@ export const App = () => {
 
   const handleDelete = async (id) => {
     const todoId = {"id": id};
-    await API.graphqlOperation(deleteTodo, todoId);
+    await API.graphql(graphqlOperation(deleteTodo, todoId));
     listTodos();
   };
 
