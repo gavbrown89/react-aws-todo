@@ -116,10 +116,10 @@ export const App = () => {
       "todo": value
     };
     await API.graphql(graphqlOperation(updateTodo, todo));
-    listTodos();
     setAddBtn(true);
     setUpdateBtn(false);
     setValue('');
+    listTodos();
   };
 
   const selectTodo = (todo) => {  
@@ -135,8 +135,8 @@ export const App = () => {
   };
 
   const data = [].concat(todo).map((item, i) =>
-    <div className="alert alert-primary alert-dismissible show" role="alert">
-      <span key={item} onClick={() => {selectTodo(item)}}>{item.todo}</span>
+    <div key={item} onClick={() => {selectTodo(item)}} className="alert alert-primary alert-dismissible show selectable-todo" role="alert">
+      <span >{item.todo}</span>
       <button key={i + 1} type="button" onClick={() => {handleDelete(item.id)}} className="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
@@ -147,37 +147,43 @@ export const App = () => {
     authState === AuthState.SignedIn && user ? (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2 className="App-title">Todo App</h2>
-          <AmplifySignOut />
+            <div className="col-md-6 text-left header-contents-container">
+              <img src={logo} className="App-logo" alt="logo" />
+              <h4 className="App-title">Todo App</h4>
+            </div>
+            <div className="col-md-6 text-right header-contents-container">
+              <div className="sign-out-btn">
+                <AmplifySignOut />
+              </div>
+            </div>
         </header>
-        <div className="container">
+        <div className="container" style={{ marginTop: -30 }}>
           <Card>
-            <Card.Header>Create a new todo</Card.Header>
+            <Card.Header className="text-left">Create a new todo</Card.Header>
             {addBtn ?
             <Card.Body>
-              <form onSubmit={handleSubmit}>
-                <div className="input-group mb-3">
-                  <input type="text" className="form-control form-control-lg" placeholder="new todo" value={value} onChange={handleChange} />
+              <Form onSubmit={handleSubmit}>
+                <Form.Group className="input-group mb-3">
+                  <Form.Control type="text" className="form-control form-control-lg" placeholder="new todo" value={value} onChange={handleChange} />
                   <div className="input-group-append">
-                    <button className="btn btn-primary" type="submit">
-                      Add todo
-                    </button>
+                    <Button variant="primary" type="submit">
+                        Add todo
+                    </Button>
                   </div>
-                </div>
-              </form>
+                </Form.Group>
+              </Form>
             </Card.Body>
             : null}
             {updateBtn ?
             <Card.Body>
-              <form onSubmit={handleUpdate}>
-                <div className="input-group mb-3">
-                  <input type="text" className="form-control form-control-lg" placeholder="Update todo" value={value} onChange={handleChange} />
+              <Form onSubmit={handleUpdate}>
+                <Form.Group className="input-group mb-3">
+                  <Form.Control type="text" className="form-control form-control-lg" placeholder="Update todo" value={value} onChange={handleChange} />
                   <div className="input-group-append">
-                    <button className="btn btn-primary" type="submit" >Update todo</button>
+                    <Button className="btn btn-primary" type="submit" >Update todo</Button>
                   </div>
-                </div>
-              </form>
+                </Form.Group>
+              </Form>
             </Card.Body>
             : null}
             <Card.Body>

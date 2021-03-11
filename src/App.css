@@ -3,7 +3,7 @@
 }
 
 .App-logo {
-  width: 200px;
+  width: 100px;
   pointer-events: none;
 }
 
@@ -17,15 +17,32 @@
   background-color: #282c34;
   height: 250px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
 }
 
+.header-contents-container {
+  height: 100%;
+  padding: 0;
+}
+
+.sign-out-btn {
+  width: 200px;
+  text-align: right;
+  margin-left: auto;
+  align-self: flex-start;
+}
+
 .App-link {
   color: #61dafb;
+}
+
+.selectable-todo:hover {
+  cursor: pointer;
+  opacity: 0.8;
 }
 
 @keyframes App-logo-spin {
